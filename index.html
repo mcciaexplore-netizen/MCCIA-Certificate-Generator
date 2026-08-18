@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertifyFlow - Premium Interactive Certificate Generator</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts for the UI and Certificate styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@400;700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Style sheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main App Layout -->
+  <div class="app-container">
+    
+    <!-- Left Sidebar (Controls & Data) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fa-solid fa-certificate gold-glow"></i>
+          <span>CertifyFlow</span>
+        </div>
+      </div>
+
+      <div class="sidebar-scrollable">
+        <!-- Step 1: Upload Template -->
+        <section class="control-section" id="step-template">
+          <div class="section-title">
+            <span class="step-num">1</span>
+            <h3>Certificate Template</h3>
+          </div>
+          
+          <div class="upload-dropzone" id="template-dropzone">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <p class="upload-text">Drag & drop your certificate image, or <span>browse</span></p>
+            <p class="upload-subtext">Supports PNG, JPG, JPEG, SVG</p>
+            <input type="file" id="template-file-input" accept="image/*" class="file-input-hidden">
+          </div>
+
+          <div class="sample-actions">
+            <button id="btn-load-sample" class="btn btn-secondary">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Template
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: Manage Placeholders -->
+        <section class="control-section" id="step-placeholders">
+          <div class="section-title">
+            <span class="step-num">2</span>
+            <h3>Custom Placeholders</h3>
+          </div>
+          
+          <div class="placeholder-actions">
+            <button id="btn-add-element" class="btn btn-primary btn-full">
+              <i class="fa-solid fa-plus"></i> Add Text Placeholder
+            </button>
+          </div>
+
+          <div id="elements-list" class="elements-list">
+            <!-- Dynamically populated list of added text elements -->
+            <p class="empty-state-text">No placeholders added yet.</p>
+          </div>
+        </section>
+
+        <!-- Step 3: Upload Candidate CSV -->
+        <section class="control-section" id="step-data">
+          <div class="section-title">
+            <span class="step-num">3</span>
+            <h3>Recipients Data</h3>
+          </div>
+
+          <div class="csv-upload-container">
+            <div class="upload-dropzone dropzone-small" id="csv-dropzone">
+              <i class="fa-solid fa-file-csv upload-icon"></i>
+              <p class="upload-text">Upload recipients list (<span>CSV</span>)</p>
+              <input type="file" id="csv-file-input" accept=".csv" class="file-input-hidden">
+            </div>
+
+            <div class="csv-actions">
+              <button id="btn-download-sample-csv" class="btn btn-link">
+                <i class="fa-solid fa-download"></i> Download Sample CSV
+              </button>
+              <button id="btn-manual-data" class="btn btn-link">
+                <i class="fa-solid fa-pen-to-square"></i> Enter Data Manually
+              </button>
+            </div>
+          </div>
+
+          <!-- Data Status Card -->
+          <div id="csv-status-card" class="data-status-card hidden">
+            <div class="status-header">
+              <i class="fa-solid fa-circle-check text-success"></i>
+              <span id="csv-filename">recipients.csv</span>
+              <button id="btn-clear-csv" class="btn-icon-close" title="Clear data"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="status-body">
+              <div class="stat-row">
+                <span>Total Recipients:</span>
+                <strong id="csv-total-count">0</strong>
+              </div>
+              <div class="stat-row">
+                <span>Detected Headers:</span>
+                <span id="csv-headers-tags" class="header-tags-container">None</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="sidebar-footer">
+        <p>Built for beautiful high-res generators</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="main-workspace">
+      
+      <!-- Top Action Bar -->
+      <header class="top-bar">
+        <div class="workspace-mode-selector">
+          <button id="mode-design" class="mode-btn active">
+            <i class="fa-solid fa-compass-drafting"></i> Design Canvas
+          </button>
+          <button id="mode-preview" class="mode-btn">
+            <i class="fa-solid fa-eye"></i> Live Preview
+          </button>
+        </div>
+
+        <div class="preview-pagination-controls hidden" id="preview-pagination">
+          <button id="btn-prev-recipient" class="btn btn-icon" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <span class="pagination-info">
+            Recipient <strong id="current-recipient-index">1</strong> of <strong id="total-recipient-count">1</strong>
+          </span>
+          <button id="btn-next-recipient" class="btn btn-icon" disabled>
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button id="btn-delete-recipient" class="btn btn-danger btn-icon" title="Delete current recipient" style="margin-left: 8px;">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+
+        <div class="export-actions">
+          <div class="export-subgroup">
+            <span class="export-label">Download:</span>
+            <button id="btn-export-single-png" class="btn btn-primary btn-sm" disabled>
+              <i class="fa-solid fa-image"></i> PNG
+            </button>
+            <button id="btn-export-single-pdf" class="btn btn-primary btn-sm" disabled>
+              <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+          </div>
+          
+          <div class="export-divider"></div>
+          
+          <div class="export-subgroup">
+            <span class="export-label">Bulk:</span>
+            <button id="btn-export-zip" class="btn btn-success btn-sm" disabled>
+              <i class="fa-solid fa-file-zipper"></i> ZIP
+            </button>
+            <button id="btn-export-pdf" class="btn btn-success btn-sm" disabled>
+              <i class="fa-solid fa-book"></i> PDF Book
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Center Stage Area -->
+      <div class="canvas-stage">
+        
+        <!-- Welcome Screen (shown when no template is loaded) -->
+        <div id="welcome-view" class="welcome-view">
+          <div class="welcome-card">
+            <i class="fa-solid fa-award welcome-icon"></i>
+            <h2>Create Stunning Certificates</h2>
+            <p>Upload a custom template image or generate our high-quality sample template to get started instantly. Once loaded, place tags, import a spreadsheet, and compile them all into PDF/PNG format.</p>
+            <div class="welcome-buttons">
+              <button id="welcome-btn-browse" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-image"></i> Upload Template Image
+              </button>
+              <button id="welcome-btn-sample" class="btn btn-secondary btn-lg">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Try Sample Template
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editor View (containing the interactive visual editor wrapper) -->
+        <div id="editor-view" class="editor-view hidden">
+          <!-- Workspace wrapper representing the canvas and absolute overlays -->
+          <div id="canvas-workspace" class="canvas-workspace">
+            <!-- Background Template Image -->
+            <img id="template-img-display" class="template-img" src="" alt="Certificate Template">
+            
+            <!-- Absolute Positioning Layer for elements -->
+            <div id="interactive-overlay" class="interactive-overlay"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Panel (Formatting & properties editor) -->
+      <footer class="property-panel hidden" id="property-panel">
+        <div class="panel-header">
+          <span class="panel-tag"><i class="fa-solid fa-sliders"></i> Text Properties</span>
+          <span id="selected-element-name" class="selected-name">Placeholder Tag: {{name}}</span>
+        </div>
+        
+        <div class="panel-grid">
+          <!-- Text Value / Tag -->
+          <div class="prop-group">
+            <label for="prop-text">Placeholder Value / Tag</label>
+            <input type="text" id="prop-text" placeholder="e.g. {{Name}}">
+          </div>
+
+          <!-- Bind to Data Column -->
+          <div class="prop-group">
+            <label for="prop-binding">Bind to Data Column</label>
+            <select id="prop-binding" class="select-input">
+              <option value="">None (Static Text)</option>
+            </select>
+          </div>
+
+          <!-- Font Family & Font Size -->
+          <div class="prop-group">
+            <label for="prop-font">Font Family</label>
+            <select id="prop-font" class="select-input">
+              <option value="Inter">Inter (Sans-Serif)</option>
+              <option value="Montserrat">Montserrat (Modern Sans)</option>
+              <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
+              <option value="Cinzel">Cinzel (Classic Roman)</option>
+              <option value="Great Vibes">Great Vibes (Calligraphy Script)</option>
+              <option value="Alex Brush">Alex Brush (Fine Script)</option>
+              <option value="Dancing Script">Dancing Script (Playful Script)</option>
+              <option value="Roboto">Roboto (Clean Sans)</option>
+            </select>
+          </div>
+
+          <div class="prop-group size-group">
+            <label for="prop-size">Font Size (px)</label>
+            <div class="input-range-container">
+              <input type="number" id="prop-size-num" class="num-input" value="40" min="10" max="200">
+              <input type="range" id="prop-size-range" min="10" max="200" value="40" class="range-slider">
+            </div>
+          </div>
+
+          <!-- Text Color -->
+          <div class="prop-group color-group">
+            <label for="prop-color">Text Color</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="prop-color" value="#000000">
+              <input type="text" id="prop-color-hex" value="#000000" class="hex-input">
+            </div>
+          </div>
+
+          <!-- Alignment & Styling -->
+          <div class="prop-group text-styling-group">
+            <label>Text Style</label>
+            <div class="btn-group">
+              <button id="prop-bold" class="toggle-btn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+              <button id="prop-italic" class="toggle-btn" title="Italic"><i class="fa-solid fa-italic"></i></button>
+            </div>
+            
+            <label>Alignment</label>
+            <div class="btn-group">
+              <button id="prop-align-left" class="toggle-btn" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+              <button id="prop-align-center" class="toggle-btn" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+              <button id="prop-align-right" class="toggle-btn" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Remove Element -->
+          <div class="prop-group delete-group">
+            <label>&nbsp;</label>
+            <button id="btn-delete-element" class="btn btn-danger btn-full">
+              <i class="fa-solid fa-trash-can"></i> Delete Placeholder
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Manual Data Modal -->
+  <div id="manual-data-modal" class="modal-overlay hidden">
+    <div class="modal-box glass">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-table"></i> Enter Recipients Manually</h3>
+        <button id="btn-close-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Enter your recipient details. Use standard CSV format (comma separated values) with headers in the first line. <strong>Make sure your header names match the placeholder tags!</strong></p>
+        
+        <div class="csv-sample-reference">
+          <strong>Example:</strong><br>
+          <code>Name,Course,Date,Id</code><br>
+          <code>Jane Doe,Full Stack Web Development,July 27th 2026,CERT-100234</code><br>
+          <code>John Smith,Data Science Certificate,August 5th 2026,CERT-100235</code>
+        </div>
+        
+        <textarea id="manual-csv-textarea" class="manual-csv-input" placeholder="Name,Course,Date,Id&#10;Jane Doe,Full Stack Web Development,July 27th 2026,CERT-100234&#10;John Smith,Data Science Certificate,August 5th 2026,CERT-100235"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+        <button id="btn-apply-manual-data" class="btn btn-success">
+          <i class="fa-solid fa-check"></i> Load Recipients
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden rendering Canvas (used in high-res PNG export and PDF compilation) -->
+  <canvas id="export-canvas" style="display: none;"></canvas>
+
+  <!-- External JS Libraries (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <!-- App scripts -->
+  <script src="samples.js?v=1.2"></script>
+  <script src="app.js?v=1.2"></script>
+
+  <!-- NEW: Bridge for API server -->
+  <script src="app-bridge.js"></script>
+</body>
+</html>
