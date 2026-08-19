@@ -27,7 +27,7 @@ certificate-generator/
 
 ## Getting Started
 
-Since the application runs entirely client-side, you only need to serve the directory files using a simple local HTTP server.
+Since the application runs entirely client-side (no Node.js, NPM, or backend required), you only need to serve the directory files using a simple local HTTP server.
 
 1. Open your terminal in the project directory.
 2. Launch a Python HTTP server:
