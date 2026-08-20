@@ -1,0 +1,29 @@
+{
+  "name": "mccia-certificate-generator-main",
+  "version": "1.0.0",
+  "description": "A premium, fully client-side web application to design custom certificate templates, bind data fields, preview recipient lists, and export high-resolution certificates individually or in bulk.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://%3CYOUR_TOKEN%3E@github.com/mcciaexplore-netizen/MCCIA-Certificate-Generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mcciaexplore-netizen/MCCIA-Certificate-Generator/issues"
+  },
+  "homepage": "https://github.com/mcciaexplore-netizen/MCCIA-Certificate-Generator#readme",
+  "dependencies": {
+    "canvas": "^3.2.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true
+  }
+}
